@@ -18,14 +18,19 @@ const phases = [
     items: ["Receiver: journal + transfer engine + verifier", "Reference CLI sender", "Golden vectors · 24 tests green (e2e + crash recovery)"],
   },
   {
-    status: "next" as const,
+    status: "done" as const,
     title: "Phase 1.5 — Windows tray app",
-    items: ["Wraps the proven protocol core", "mDNS discovery + QR pairing", "Auto-start + notifications"],
+    items: ["Electron + relay engine, one codebase", "Big QR pairing + 6-word confirm", "Zero-tap background transfers — e2e tested"],
+  },
+  {
+    status: "next" as const,
+    title: "Phase 2 — Android app",
+    items: ["MediaStore scanner + QR camera pairing", "Foreground transfer service", "Validated against relay/ golden vectors"],
   },
   {
     status: "later" as const,
-    title: "Phase 2 / 3 — Android & iOS apps",
-    items: ["MediaStore / PhotoKit scanners", "Foreground transfer service", "Validated against relay/ golden vectors"],
+    title: "Phase 3 — iOS app",
+    items: ["PhotoKit scanner", "Bonjour discovery", "BackgroundTasks continuation"],
   },
 ];
 

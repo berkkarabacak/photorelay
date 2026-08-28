@@ -7,13 +7,10 @@
  */
 import { parseArgs } from "node:util";
 import os from "node:os";
-import { createRequire } from "node:module";
+import qrcode from "qrcode-terminal";
 import { pairingPayload } from "../pairing/certs.js";
 import { Receiver } from "./server.js";
 import type { LogKind } from "./session.js";
-
-const require = createRequire(import.meta.url);
-const qrcode = require("qrcode-terminal") as { generate: (text: string, opts: { small: boolean }) => void };
 
 const { values } = parseArgs({
   options: {

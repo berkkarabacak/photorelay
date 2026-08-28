@@ -23,6 +23,7 @@ reconnect and continue exactly where you left off.
 | [`docs/ux-design.md`](docs/ux-design.md) | UX principles, flows, and copy deck |
 | [`website/`](website/) | Product website + interactive transfer-protocol demo (React + TypeScript + Vite + Tailwind) |
 | [`relay/`](relay/) | **RelaySync/1 reference implementation** — receiver (journal + transfer engine + verifier), CLI sender, golden test vectors, 24 tests |
+| [`tray-app/`](tray-app/) | **Windows tray app** — Electron + the relay engine; big QR pairing screen, zero-tap background transfers, elderly-first UI |
 
 ## Core design principles
 
@@ -47,7 +48,7 @@ reconnect and continue exactly where you left off.
 - [x] UX design
 - [x] Product website + interactive protocol demo
 - [x] RelaySync/1 reference implementation (receiver + CLI sender + golden vectors, [`relay/`](relay/))
-- [ ] Windows tray app (mDNS discovery, auto-start) — protocol core proven in `relay/`
+- [x] Windows tray app ([`tray-app/`](tray-app/)) — big QR pairing, zero-tap transfers, Electron + relay engine
 - [ ] Android app
 - [ ] iOS app
 

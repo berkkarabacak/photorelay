@@ -14,7 +14,7 @@ import { encodeFrame } from "../protocol/frames.js";
 import { loadOrCreateIdentity, peerFingerprint, type DeviceIdentity } from "../pairing/certs.js";
 import { Journal } from "./journal.js";
 import { MediaStore } from "./store.js";
-import { ReceiverSession, type Logger } from "./session.js";
+import { ReceiverSession, type Logger, type ReceiverEvent } from "./session.js";
 
 export interface ReceiverOptions {
   /** Library root, e.g. D:\\Photos (created if missing) */
@@ -27,6 +27,8 @@ export interface ReceiverOptions {
   acceptFingerprints?: string[];
   /** Level-3 SHA-256 verification at finalize (default true) */
   verifyFull?: boolean;
+  /** Structured events for UIs */
+  events?: (e: ReceiverEvent) => void;
   log?: Logger;
 }
 
@@ -87,6 +89,15 @@ export class Receiver {
     return rows.map((r) => r.device_id);
   }
 
+  /** Pairing mode admits the next unknown device (fail closed when off). */
+  setPairMode(on: boolean): void {
+    this.opts.pair = on;
+  }
+
+  get pairMode(): boolean {
+    return !!this.opts.pair;
+  }
+
   private onConnection(socket: tls.TLSSocket): void {
     this.sockets.add(socket);
     socket.once("close", () => this.sockets.delete(socket));
@@ -136,6 +147,7 @@ export class Receiver {
         deviceId: fp,
         verifyFull: this.opts.verifyFull ?? true,
         log: this.log,
+        events: this.opts.events,
       });
       this.activeByDevice.set(fp, session);
       socket.once("close", () => this.activeByDevice.delete(fp));

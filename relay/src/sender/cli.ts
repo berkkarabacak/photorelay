@@ -8,11 +8,14 @@
 import { parseArgs } from "node:util";
 import { Sender, type SenderStats } from "./client.js";
 import type { LogKind } from "../receiver/session.js";
+import { loadOrCreateIdentity, parsePairingPayload } from "../pairing/certs.js";
+import { computeSas, formatSas } from "../pairing/sas.js";
 
 const { values } = parseArgs({
   options: {
     from: { type: "string" },
     to: { type: "string" },
+    "pair-uri": { type: "string" },
     trust: { type: "string" },
     state: { type: "string" },
     name: { type: "string", default: "cli-sender" },
@@ -21,15 +24,17 @@ const { values } = parseArgs({
   },
 });
 
-if (values.help || !values.from || !values.to) {
+if (values.help || !values.from || (!values.to && !values["pair-uri"])) {
   console.log(`PhotoRelay reference sender (RelaySync/1)
 
 Usage:
   npm run sender -- --from <media-dir> --to <host:port> [options]
+  npm run sender -- --from <media-dir> --pair-uri "relaysync://pair?..."   ← what the QR contains
 
 Options:
   --from <dir>        Folder acting as the phone library (required)
-  --to <host:port>    Receiver address (required)
+  --to <host:port>    Receiver address
+  --pair-uri <uri>    Pairing payload from the PC's QR code (sets address + trust)
   --trust <fp>        Expected receiver fingerprint (TOFU pairing)
   --state <dir>       Sender state dir (default: <from>/.photorelay-sender)
   --name <name>       Device name shown on the PC (default: cli-sender)
@@ -39,7 +44,19 @@ Options:
   process.exit(values.help ? 0 : 1);
 }
 
-const [host, portStr] = values.to!.split(":");
+let host: string, port: number, trust: string | undefined, nonce: string | undefined;
+if (values["pair-uri"]) {
+  const p = parsePairingPayload(values["pair-uri"]);
+  host = p.host;
+  port = p.port;
+  trust = p.fingerprint;
+  nonce = p.nonce;
+} else {
+  const [h, portStr] = values.to!.split(":");
+  host = h;
+  port = Number(portStr);
+  trust = values.trust;
+}
 const COLORS: Record<LogKind, string> = {
   info: "\x1b[37m",
   proto: "\x1b[36m",
@@ -52,16 +69,25 @@ const log = (kind: LogKind, msg: string) => {
   console.log(`${"\x1b[90m"}${t}${"\x1b[0m"} ${COLORS[kind]}${msg}${"\x1b[0m"}`);
 };
 
+const stateDir = values.state ?? `${values.from}/.photorelay-sender`;
 const sender = new Sender({
   host,
-  port: Number(portStr),
+  port,
   libraryDir: values.from!,
-  stateDir: values.state ?? `${values.from}/.photorelay-sender`,
+  stateDir,
   deviceName: values.name,
-  trustFingerprint: values.trust,
+  trustFingerprint: trust,
   chaosDropRate: Number(values.chaos),
   log,
 });
+
+// When pairing via QR payload, show the short authentication string so the
+// user can confirm both screens show the same 6 words (security-model §3.5).
+if (nonce && trust) {
+  const identity = loadOrCreateIdentity(stateDir, values.name ?? "cli-sender");
+  console.log(`\nSecurity check — the computer screen should show the same 6 words:`);
+  console.log(`\n    ${formatSas(computeSas(trust, identity.fingerprint, nonce))}\n`);
+}
 
 try {
   const stats: SenderStats = await sender.run();

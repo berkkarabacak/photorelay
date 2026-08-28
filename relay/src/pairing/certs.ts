@@ -11,15 +11,7 @@
 import { X509Certificate, createHash, randomBytes } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { createRequire } from "node:module";
-
-const require = createRequire(import.meta.url);
-const selfsigned = require("selfsigned") as {
-  generate: (
-    attrs: Array<{ name: string; value: string }>,
-    opts: Record<string, unknown>
-  ) => { private: string; cert: string };
-};
+import selfsigned from "selfsigned";
 
 export interface DeviceIdentity {
   /** PEM private key (encrypt at rest in production; dev-only plaintext here) */
@@ -87,6 +79,33 @@ export function pairingPayload(opts: {
     exp: String(exp),
   });
   return { payload: `relaysync://pair?${params.toString()}`, nonce };
+}
+
+/** Parse and validate a `relaysync://pair?…` QR payload (sender side). */
+export function parsePairingPayload(uri: string): {
+  host: string;
+  port: number;
+  fingerprint: string;
+  nonce: string;
+  exp: number;
+} {
+  const u = new URL(uri);
+  if (u.protocol !== "relaysync:" || u.hostname !== "pair") {
+    throw new Error("not a RelaySync pairing payload");
+  }
+  const q = u.searchParams;
+  const host = q.get("host");
+  const port = Number(q.get("port"));
+  const fingerprint = q.get("pk");
+  const nonce = q.get("nonce");
+  const exp = Number(q.get("exp"));
+  if (!host || !port || !fingerprint || !nonce || !exp) {
+    throw new Error("incomplete pairing payload");
+  }
+  if (exp * 1000 < Date.now()) {
+    throw new Error("pairing code expired — generate a fresh one on the PC");
+  }
+  return { host, port, fingerprint, nonce, exp };
 }
 
 export function sha256FingerprintOfHex(hex: string): string {

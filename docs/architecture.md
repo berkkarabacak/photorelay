@@ -220,8 +220,9 @@ a core could implement them without protocol changes.
    receiver (journal + transfer engine + verifier) and CLI sender with
    golden test vectors; e2e + crash-recovery tests prove resume, dedup, and
    verification
-3. **Phase 1.5 — Windows tray app** (wraps the proven core; adds mDNS
-   discovery, auto-start, notifications)
+3. **Phase 1.5 — Windows tray app** ✅ [`tray-app/`](../tray-app/) — Electron
+   shell around the proven core; big-QR pairing, zero-tap background
+   transfers, e2e-tested pairing→transfer→done journey
 4. **Phase 2 — Android app**
 5. **Phase 3 — iOS app**
 6. **Phase 4 — Polish**: background scheduling, selective albums, bandwidth

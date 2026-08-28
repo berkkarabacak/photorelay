@@ -21,6 +21,7 @@ import {
   type ManifestItem,
   type ManifestMsg,
   type PlanItem,
+  type SessionState,
 } from "../protocol/messages.js";
 import { sanitizeRelPath } from "../protocol/paths.js";
 import type { Journal } from "./journal.js";
@@ -28,6 +29,16 @@ import type { MediaStore } from "./store.js";
 
 export type LogKind = "info" | "proto" | "ok" | "warn" | "err";
 export type Logger = (kind: LogKind, msg: string) => void;
+
+/** Structured events for UIs (tray app) — logs are for humans, these are for code. */
+export type ReceiverEvent =
+  | { type: "connected"; deviceId: string; deviceName: string }
+  | { type: "plan"; send: number; resume: number; skip: number; totalItems: number; totalBytes: number }
+  | { type: "progress"; fileId: string; name: string; haveBytes: number; size: number }
+  | { type: "file_verified"; fileId: string; name: string; storedAs: string }
+  | { type: "interrupted"; remainingItems: number }
+  | { type: "complete"; stored: number; skipped: number }
+  | { type: "state"; state: SessionState };
 
 interface PlannedFile {
   item: ManifestItem;
@@ -41,6 +52,7 @@ export interface ReceiverSessionOptions {
   deviceId: string; // pinned fingerprint of the peer's TLS cert
   verifyFull: boolean; // Level-3 SHA-256 at finalize (default true)
   log: Logger;
+  events?: (e: ReceiverEvent) => void;
 }
 
 export class ReceiverSession {
@@ -50,6 +62,7 @@ export class ReceiverSession {
   private readonly deviceId: string;
   private readonly verifyFull: boolean;
   private readonly log: Logger;
+  private readonly emit: (e: ReceiverEvent) => void;
 
   private readonly decoder = new FrameDecoder();
   private sessionId = "";
@@ -66,6 +79,7 @@ export class ReceiverSession {
     this.deviceId = opts.deviceId;
     this.verifyFull = opts.verifyFull;
     this.log = opts.log;
+    this.emit = opts.events ?? (() => {});
   }
 
   attach(): void {
@@ -145,6 +159,8 @@ export class ReceiverSession {
 
     this.journal.setSessionState(sessionId, "MANIFEST_EXCHANGE");
     this.journal.addEvent(sessionId, "connect", { device: payload.device_name });
+    this.emit({ type: "connected", deviceId: this.deviceId, deviceName: payload.device_name });
+    this.emit({ type: "state", state: "MANIFEST_EXCHANGE" });
     this.send(MsgType.HELLO_ACK, {
       protocol: PROTOCOL_VERSION,
       session_id: sessionId,
@@ -197,6 +213,12 @@ export class ReceiverSession {
       }
     }
     this.journal.addEvent(this.sessionId, "plan", { send, resume, skip });
+    const totalBytes = items.filter((i) => {
+      const plan = plans.find((p) => p.file_id === i.file_id);
+      return plan?.action !== "SKIP";
+    }).reduce((a, i) => a + i.size, 0);
+    this.emit({ type: "plan", send, resume, skip, totalItems: items.length, totalBytes });
+    this.emit({ type: "state", state: send + resume === 0 ? "COMPLETE" : "TRANSFERRING" });
     if (resume > 0) this.log("proto", `PLAN → SEND ${send} · RESUME ${resume} (verified data never re-sent) · SKIP ${skip}`);
     else this.log("proto", `PLAN → SEND ${send} · SKIP ${skip} (already backed up)`);
     if (plans.length > 0 && send + resume === 0) {
@@ -274,6 +296,7 @@ export class ReceiverSession {
         throw err;
       }
       this.journal.recordChunk(this.sessionId, fileId, index, frame.offset, frame.data.length, actualXxh64);
+      this.emit({ type: "progress", fileId, name: item.name, haveBytes: (index + 1) * CHUNK_SIZE, size: item.size });
     }
     this.send(MsgType.CHUNK_ACK, { file_id: fileId, offset: frame.offset });
   }
@@ -341,6 +364,7 @@ export class ReceiverSession {
     this.journal.markStored(this.sessionId, item.file_id, storedAs, sha);
     this.planned.delete(item.file_id);
     this.log("ok", `FILE_VERIFIED ${item.name} → ${storedAs}`);
+    this.emit({ type: "file_verified", fileId: item.file_id, name: item.name, storedAs });
     this.send(MsgType.FILE_VERIFIED, { file_id: item.file_id, stored_as: storedAs, sha256: sha });
 
     const stats = this.journal.stats(this.sessionId);
@@ -360,6 +384,7 @@ export class ReceiverSession {
     const skipped = stats.skipped ?? 0;
     this.journal.addEvent(this.sessionId, "bye", { stored, skipped });
     this.log("ok", `Session complete — ${stored} stored, ${skipped} skipped (already backed up)`);
+    this.emit({ type: "complete", stored, skipped });
     this.socket.end();
   }
 
@@ -373,6 +398,7 @@ export class ReceiverSession {
         (stats.planned ?? 0) + (stats.transferring ?? 0) + (stats.verifying ?? 0) + (stats.interrupted ?? 0);
       if (remaining > 0) {
         this.journal.setSessionState(this.sessionId, "INTERRUPTED");
+        this.emit({ type: "interrupted", remainingItems: remaining });
         this.log("err", "Connection lost — waiting for phone…");
       }
     } catch {

@@ -8,17 +8,8 @@
  *                 CHUNK_DATA binary headers
  */
 import { createHash } from "node:crypto";
-import { createRequire } from "node:module";
+import XXH from "xxhashjs";
 import { FILE_ID_HASH_BYTES } from "./constants.js";
-
-// xxhashjs is CommonJS; load it via createRequire so ESM callers stay clean.
-const require = createRequire(import.meta.url);
-const XXH = require("xxhashjs") as {
-  h64: (seed: number) => {
-    update: (data: ArrayBuffer) => { digest: () => { toString: (radix: number) => string } };
-    digest: () => { toString: (radix: number) => string };
-  };
-};
 
 function toArrayBuffer(buf: Buffer | Uint8Array): ArrayBuffer {
   const ab = new ArrayBuffer(buf.byteLength);

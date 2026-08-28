@@ -1,0 +1,40 @@
+{
+  "name": "@photorelay/tray-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "PhotoRelay Windows tray app — big QR pairing, zero-tap transfers, zero command line.",
+  "main": "dist/main/main.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build && node scripts/build-main.mjs",
+    "typecheck": "tsc -b",
+    "start": "electron .",
+    "smoke": "electron . --smoke",
+    "icons": "node scripts/make-icons.mjs",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.20",
+    "electron": "^39.0.0",
+    "esbuild": "^0.25.0",
+    "postcss": "^8.4.49",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.15",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}
