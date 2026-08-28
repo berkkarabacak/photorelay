@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:pages": "vite build --base=/photorelay/",
     "typecheck": "tsc -b",
     "preview": "vite preview"
   },

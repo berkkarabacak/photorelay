@@ -4,6 +4,22 @@ Version 0.1 · Status: initial design
 
 ---
 
+## 0. Who this is for
+
+PhotoRelay is a **free** product for **non-technical users** — including
+elderly people whose only computer skills are clicking a mouse and tapping a
+phone screen. Every design decision is subordinate to that audience:
+
+- If a flow requires reading a manual, it is wrong.
+- If a button's purpose isn't obvious from its label alone, it is wrong.
+- If anything on screen can be mis-tapped into a bad state, it is wrong.
+- Big targets, big text, one obvious action per screen.
+
+The product must be operable by someone who has never heard the words
+"folder", "cable", or "backup settings".
+
+---
+
 ## 1. Experience principle
 
 > The user should never have to understand MTP, SMB, networking, checksums,

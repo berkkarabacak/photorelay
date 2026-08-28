@@ -70,10 +70,13 @@ export function Hero() {
             </span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            PhotoRelay moves your entire photo &amp; video library from phone to PC over Wi-Fi —
-            with automatic resume, integrity verification, and duplicate detection. Disconnect
-            mid-transfer, reboot the PC, come back tomorrow: it continues at the exact chunk
-            where it stopped.
+            The easiest way to move every photo and video from your phone to your computer.
+            No cables, no folders, nothing to learn — it works all by itself over Wi-Fi.
+          </p>
+          <p className="mt-3 max-w-xl text-base leading-relaxed text-muted-foreground/80">
+            Under the hood: automatic resume, integrity verification, and duplicate detection.
+            Disconnect mid-transfer, restart the PC, come back tomorrow — it continues at the
+            exact chunk where it stopped. Free and open source, forever.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a
