@@ -1,16 +1,18 @@
 # PhotoRelay
 
-**Reliable photo & video transfer from phone to PC.**
+**Reliable photo & video backup from phone to PC — just plug in the cable. No phone app. Free, forever.**
 
 > Transfers can fail. PhotoRelay makes failure irrelevant.
 
-Transferring thousands of photos and videos from a phone to a Windows PC is
-surprisingly unreliable: MTP connections drop, Windows Explorer freezes,
-transfers stall at 70%, and nobody can tell you which files actually made it.
-PhotoRelay is designed from the ground up as a **fault-tolerant
-synchronization protocol**, not a prettier file copy. If the phone
-disconnects, Wi-Fi disappears, the app crashes, or the PC restarts, you
-reconnect and continue exactly where you left off.
+Built for non-technical users (and the family members who help them):
+plug the phone into the PC with its own charging cable and PhotoRelay does
+everything — finds the photos, copies them, checks them, and if the cable is
+bumped halfway through 3,000 photos, it simply continues where it stopped.
+Nothing to learn, nothing to tap, no duplicates, no cloud.
+
+The same fault-tolerant engine also powers an optional Wi-Fi mode
+(RelaySync/1) for future companion apps — but a cable and this Windows app
+are all anyone needs.
 
 ## Repository contents
 
@@ -48,9 +50,9 @@ reconnect and continue exactly where you left off.
 - [x] UX design
 - [x] Product website + interactive protocol demo
 - [x] RelaySync/1 reference implementation (receiver + CLI sender + golden vectors, [`relay/`](relay/))
-- [x] Windows tray app ([`tray-app/`](tray-app/)) — big QR pairing, zero-tap transfers, Electron + relay engine
-- [ ] Android app
-- [ ] iOS app
+- [x] Windows tray app ([`tray-app/`](tray-app/)) — **USB plug-and-play: no phone app needed**, fault-tolerant pull engine, elderly-first UI
+- [ ] Real-phone USB validation + one-click installer packaging
+- [ ] Optional companion apps (Wi-Fi auto-backup) — not required for the core product
 
 ## Developing the website
 

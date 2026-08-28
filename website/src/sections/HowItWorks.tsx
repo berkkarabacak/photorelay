@@ -1,33 +1,23 @@
 const steps = [
   {
     n: "1",
-    title: "Install the PC app",
-    body: "A small Windows tray app. It shows a QR code and otherwise stays out of the way.",
+    title: "Install PhotoRelay on the PC — once",
+    body: "A one-time setup, done by a family member or anyone comfortable with computers. After that, nobody touches it.",
   },
   {
     n: "2",
-    title: "Open the phone app",
-    body: "Android or iOS. The first screen is the camera, ready to scan. No account, no wizard.",
+    title: "Plug the phone in with its charging cable",
+    body: "The same cable used for charging. The very first time, the phone may ask once — tap “Allow” or “Trust.”",
   },
   {
     n: "3",
-    title: "Scan to pair",
-    body: "The QR carries the PC's key and address. Both screens show the same 6 words — tap confirm. Paired forever.",
+    title: "It copies everything by itself",
+    body: "Every photo and video, checked as it goes. Bump the cable or restart the PC — it simply continues where it stopped. Never a duplicate.",
   },
   {
     n: "4",
-    title: "Choose what to back up",
-    body: "Pick albums or date ranges — or just “Back up everything.”",
-  },
-  {
-    n: "5",
-    title: "Press Transfer",
-    body: "The apps exchange a manifest, skip what's already backed up, and stream the rest over encrypted Wi-Fi.",
-  },
-  {
-    n: "6",
-    title: "Walk away",
-    body: "Lid closed, phone in your pocket, Wi-Fi down — it waits, reconnects, and resumes by itself until it's done.",
+    title: "Unplug when it says “All done!”",
+    body: "That's the whole routine. New photos are picked up automatically every time the phone is plugged in.",
   },
 ];
 
@@ -37,11 +27,10 @@ export function HowItWorks() {
       <div className="mb-12 max-w-2xl">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">How it works</h2>
         <p className="mt-3 text-muted-foreground">
-          The whole product in six steps. You will never see the words MTP, driver, DCIM, or
-          checksum — those are our job, not yours.
+          No phone app to install, nothing to configure. The cable is the interface.
         </p>
       </div>
-      <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {steps.map((s) => (
           <li key={s.n} className="relative rounded-2xl border border-border bg-card/60 p-6">
             <span className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-950 font-mono text-sm font-bold text-emerald-300 border border-emerald-800/60">
@@ -53,9 +42,9 @@ export function HowItWorks() {
         ))}
       </ol>
       <p className="mt-8 text-center text-sm text-muted-foreground">
-        If the connection disappears: <span className="text-amber-300">“Connection lost — waiting for phone…”</span>
+        If the cable comes loose: <span className="text-amber-300">“The cable came loose — plug it back in.”</span>
         {"  "}→{"  "}
-        <span className="text-emerald-300">“Connected — resuming transfer…”</span> — automatically, every time.
+        <span className="text-emerald-300">it continues by itself</span> — automatically, every time.
       </p>
     </section>
   );

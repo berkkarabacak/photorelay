@@ -19,18 +19,18 @@ const phases = [
   },
   {
     status: "done" as const,
-    title: "Phase 1.5 — Windows tray app",
-    items: ["Electron + relay engine, one codebase", "Big QR pairing + 6-word confirm", "Zero-tap background transfers — e2e tested"],
+    title: "Windows app — USB plug & play",
+    items: ["No phone app — just the charging cable", "Fault-tolerant pull engine (journal, resume, dedup)", "Elderly-first UI · e2e tested incl. cable bumps"],
   },
   {
     status: "next" as const,
-    title: "Phase 2 — Android app",
-    items: ["MediaStore scanner + QR camera pairing", "Foreground transfer service", "Validated against relay/ golden vectors"],
+    title: "Hardware validation & installer",
+    items: ["Real Android + iPhone cable tests", "One-click installer (electron-builder)", "Auto-start with Windows"],
   },
   {
     status: "later" as const,
-    title: "Phase 3 — iOS app",
-    items: ["PhotoKit scanner", "Bonjour discovery", "BackgroundTasks continuation"],
+    title: "Optional companion apps",
+    items: ["Wi-Fi auto-backup without a cable", "Validated against relay/ golden vectors", "Nice-to-have — never required"],
   },
 ];
 

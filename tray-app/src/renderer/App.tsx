@@ -44,6 +44,26 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
+function PlugScreen() {
+  return (
+    <Shell>
+      <div className="mb-6 flex h-28 w-28 items-center justify-center rounded-full bg-card border border-border">
+        <span className="text-6xl">🔌</span>
+      </div>
+      <h1 className="mb-3 max-w-2xl text-4xl font-bold leading-tight">
+        Plug the phone into this computer with its USB cable
+      </h1>
+      <p className="max-w-lg text-xl leading-relaxed text-mutedfg">
+        Use the phone's own charging cable. The very first time, the phone may ask —
+        tap <span className="font-semibold text-foreground">“Allow”</span> or{" "}
+        <span className="font-semibold text-foreground">“Trust”</span> once. After that, everything
+        happens by itself.
+      </p>
+      <p className="mt-8 animate-pulse-soft text-lg text-mutedfg">Waiting for the phone…</p>
+    </Shell>
+  );
+}
+
 function PairScreen({ state }: { state: TrayState }) {
   return (
     <Shell>
@@ -95,12 +115,12 @@ function TransferScreen({ state }: { state: TrayState }) {
       <h1
         className={`mb-2 max-w-2xl text-4xl font-bold leading-tight ${waiting ? "text-amber" : ""}`}
       >
-        {waiting ? "Connection lost — waiting for phone…" : "Copying your photos…"}
+        {waiting ? state.headline : "Copying your photos…"}
       </h1>
       <p className="mb-8 max-w-lg text-xl text-mutedfg">
         {waiting
-          ? "Nothing is lost. It will continue by itself the moment the phone is back."
-          : "You can close this window — it keeps working even if the Wi-Fi stops."}
+          ? "Nothing is lost. It will continue by itself the moment the cable is back."
+          : "You can close this window — it keeps working even if the cable is bumped."}
       </p>
       <div className="w-full max-w-xl">
         <div className="mb-2 flex items-baseline justify-between text-xl">
@@ -153,6 +173,8 @@ export default function App() {
     );
   }
   switch (state.phase) {
+    case "plug":
+      return <PlugScreen />;
     case "pairing":
       return <PairScreen state={state} />;
     case "ready":

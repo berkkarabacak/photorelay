@@ -43,7 +43,26 @@ retries by itself, forever, with backoff.
 
 ## 3. Core flows
 
-### 3.1 First run & pairing (target: under 60 seconds)
+### 3.0 The primary flow — USB cable, no phone app (the aunt test)
+
+The intended user cannot install phone apps. The flow is therefore:
+
+```mermaid
+flowchart LR
+    A["Someone she trusts installs<br/>PhotoRelay on the PC (once)"] --> B["She plugs the phone into<br/>the PC with its charging cable"]
+    B --> C["PhotoRelay finds the phone and<br/>copies everything by itself"]
+    C --> D["“All done! You can<br/>unplug the cable now.”"]
+    C -. "cable bumped / PC restarted" .-> E["“The cable came loose — plug it<br/>back in. It will continue by itself.”"]
+    E -.-> C
+```
+
+- Zero taps on the PC. Zero apps on the phone. Zero decisions.
+- The **only** phone interaction ever: the very first time, some phones ask
+  "Allow access?" / "Trust this computer?" — one tap, once, ever.
+- New photos taken later are picked up automatically the next time the
+  cable is plugged in. Plugging in becomes the backup habit.
+
+### 3.1 First run & pairing (Wi-Fi companion-app mode, optional/future)
 
 ```mermaid
 flowchart LR
@@ -111,6 +130,10 @@ backup.
 | `state.transferring` | Transferring {done} of {total} items — {eta} left |
 | `state.waiting_phone` | Connection lost — waiting for phone… |
 | `state.waiting_pc` | Connection lost — waiting for PC… |
+| `state.plug` | Plug the phone into this computer with its USB cable |
+| `state.plug_hint` | Use the phone's own charging cable. The very first time, the phone may ask — tap "Allow" or "Trust" once. |
+| `state.cable_loose` | The cable came loose — plug it back in. It will continue by itself. |
+| `state.done_cable` | All done! {total} photos and videos are safe on this computer. You can unplug the cable now. |
 | `state.resuming` | Connected — resuming transfer… |
 | `state.verifying` | Verifying {done} of {total}… |
 | `state.complete` | Done. {total} items backed up and verified. |

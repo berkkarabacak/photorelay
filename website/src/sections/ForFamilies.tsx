@@ -1,20 +1,20 @@
-import { Camera, MonitorSmartphone, MousePointerClick, ShieldCheck } from "lucide-react";
+import { Cable, HardDriveDownload, MousePointerClick, ShieldCheck, Wrench } from "lucide-react";
 
 const steps = [
   {
-    icon: MonitorSmartphone,
-    title: "Open PhotoRelay on the computer",
-    body: "It shows one big picture on the screen. Nothing to type, nothing to set up.",
+    icon: Wrench,
+    title: "Someone installs it once",
+    body: "A family member or friend installs PhotoRelay on the computer. Five minutes, one time, never again.",
   },
   {
-    icon: Camera,
-    title: "Point the phone's camera at it",
-    body: "The phone and computer find each other and connect themselves. This happens once — they remember each other forever.",
+    icon: Cable,
+    title: "She plugs in the phone's own cable",
+    body: "The same cable that charges the phone. That's the entire job — plug it in like charging.",
   },
   {
-    icon: MousePointerClick,
-    title: "Tap the one big button",
-    body: "Every photo and video copies itself over. If the Wi-Fi stops or the computer restarts, it quietly continues by itself. You never have to start over.",
+    icon: HardDriveDownload,
+    title: "Everything copies itself",
+    body: "Every photo and video lands safely on the computer, checked as it goes. If the cable is bumped, it continues by itself — never starting over, never a duplicate.",
   },
 ];
 

@@ -3,7 +3,7 @@
  * renderer UI. Keep this file dependency-free — both sides import it.
  */
 
-export type TrayPhase = "pairing" | "ready" | "transferring" | "waiting" | "done";
+export type TrayPhase = "plug" | "pairing" | "ready" | "transferring" | "waiting" | "done";
 
 export interface TrayState {
   phase: TrayPhase;

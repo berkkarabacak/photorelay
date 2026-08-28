@@ -213,17 +213,45 @@ a core could implement them without protocol changes.
 
 ---
 
+## 3.5 USB pull mode (primary product path — no phone app)
+
+The intended user cannot install or operate a phone app. The Windows app
+therefore pulls photos **off the phone over its own charging cable**, using
+Windows' built-in MTP/WPD support (Shell32 via PowerShell — no drivers for
+Android; iPhone works after the one-time "Trust this computer" tap).
+
+The flakiness of MTP is exactly why the engine exists: enumeration stalls,
+reads truncate, devices vanish. The USB engine treats all of it as normal:
+
+- **Resumable unit = one file** (MTP has no reliable random access; photos
+  are 2–8 MB so per-file resume is the right granularity)
+- Every file: stage to `.photorelay/incoming/*.part` → size-verify →
+  optional SHA-256 → journal → atomic rename into the library
+- Cable pulled / app closed / PC restarted → the journal knows exactly which
+  files are done; the next plug-in continues, skipping stored files
+- Leftover `.part` files are deleted at startup — never mistaken for complete
+- Duplicates (same photo in two albums) are skipped by fingerprint
+
+Implementation: `tray-app/src/main/usb/` — `engine.ts` (fault tolerance,
+fully tested against `FolderSource`), `wpd.ts` (thin hardware bridge; needs
+a physical phone to exercise), `source.ts` (pluggable interface).
+
+The Wi-Fi/RelaySync/1 path (`relay/`) remains the foundation for optional
+companion apps later, but it is **not required** for the core product.
+
+---
+
 ## 9. Roadmap
 
 1. **Phase 0 — Design** ✅ this repo's `docs/` + website demo
 2. **Phase 1 — Protocol proving ground** ✅ [`relay/`](../relay/) — reference
-   receiver (journal + transfer engine + verifier) and CLI sender with
-   golden test vectors; e2e + crash-recovery tests prove resume, dedup, and
-   verification
+   receiver + CLI sender, golden vectors, e2e + crash-recovery tests
 3. **Phase 1.5 — Windows tray app** ✅ [`tray-app/`](../tray-app/) — Electron
-   shell around the proven core; big-QR pairing, zero-tap background
-   transfers, e2e-tested pairing→transfer→done journey
-4. **Phase 2 — Android app**
-5. **Phase 3 — iOS app**
-6. **Phase 4 — Polish**: background scheduling, selective albums, bandwidth
-   limits, NAS destinations
+   shell, elderly-first UI (plug cable → automatic → "All done!")
+4. **Phase 2 — USB plug-and-play engine** ✅ `tray-app/src/main/usb/` —
+   fault-tolerant MTP pull with journal/resume/dedup, tested against a
+   simulated phone
+5. **Phase 2.5 — Hardware validation & packaging**: real Android + iPhone
+   cable tests, one-click installer (electron-builder / MSIX), auto-start
+6. **Phase 3 — Optional companion apps** (Wi-Fi auto-backup without a cable)
+   — nice-to-have, not required

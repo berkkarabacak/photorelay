@@ -70,13 +70,14 @@ export function Hero() {
             </span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            The easiest way to move every photo and video from your phone to your computer.
-            No cables, no folders, nothing to learn — it works all by itself over Wi-Fi.
+            The easiest way to back up every photo and video from a phone to a computer:
+            plug in the phone's own charging cable, and PhotoRelay does everything else.
+            No phone app, no folders, nothing to learn.
           </p>
           <p className="mt-3 max-w-xl text-base leading-relaxed text-muted-foreground/80">
             Under the hood: automatic resume, integrity verification, and duplicate detection.
-            Disconnect mid-transfer, restart the PC, come back tomorrow — it continues at the
-            exact chunk where it stopped. Free and open source, forever.
+            Bump the cable, restart the PC, come back tomorrow — it continues exactly where it
+            stopped. Free and open source, forever.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a

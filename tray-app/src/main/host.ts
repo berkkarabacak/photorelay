@@ -1,56 +1,67 @@
 /**
  * TrayHost — the pure-Node brain of the Windows tray app.
  *
- * Electron's main process is a thin shell around this class; everything here
- * is testable without a display. It wraps the proven relay/ receiver and
- * translates protocol events into a tiny, elderly-friendly state model:
+ * USB-first: no phone app, ever. The elderly-user journey is:
+ *   plug in the cable → everything copies itself → unplug when it says so.
  *
- *   pairing  →  show the big QR code (nothing paired yet)
- *   ready    →  phone paired; transfers start automatically
- *   transferring → copying now (progress as "N of M photos")
- *   waiting  →  "Connection lost — waiting for phone…" (copy deck)
- *   done     →  everything verified
+ * The host polls for a portable device, runs the fault-tolerant
+ * UsbTransferEngine against it, and translates progress into a tiny state
+ * model with copy-deck headlines (docs/ux-design.md §0/§4). Interruption is
+ * a first-class state: "The cable came loose — plug it back in."
  *
- * Copy strings follow docs/ux-design.md §4 verbatim.
+ * The receiver-based Wi-Fi/QR path in relay/ remains available for the
+ * future companion apps, but the tray UI is cable-only.
  */
 import os from "node:os";
-import { Receiver } from "../../../relay/src/receiver/server.js";
-import type { ReceiverEvent } from "../../../relay/src/receiver/session.js";
-import { pairingPayload } from "../../../relay/src/pairing/certs.js";
-import { computeSas } from "../../../relay/src/pairing/sas.js";
+import path from "node:path";
+import { CableRemovedError, UsbTransferEngine, type EngineProgress } from "./usb/engine.js";
+import { WpdSource } from "./usb/wpd.js";
+import type { UsbDevice, UsbSource } from "./usb/source.js";
 import type { TrayPhase, TrayState } from "../shared/state.js";
 
 export type { TrayPhase, TrayState };
 
 export interface TrayHostOptions {
   libraryDir: string;
-  port?: number; // 0 = ephemeral (tests)
-  deviceName?: string;
+  /** Injectable source — tests and demo mode use FolderSource */
+  source?: UsbSource;
+  /** Device poll cadence (default 2500 ms) */
+  devicePollMs?: number;
+  /** Idle rescan cadence while a synced phone stays plugged in (default 30 s) */
+  idleRescanMs?: number;
 }
 
-function lanAddress(): string {
-  for (const infos of Object.values(os.networkInterfaces())) {
-    for (const info of infos ?? []) {
-      if (info.family === "IPv4" && !info.internal) return info.address;
-    }
-  }
-  return "127.0.0.1";
-}
+const COPY = {
+  plug: "Plug the phone into this computer with its USB cable",
+  plugHint: "Use the phone's own charging cable. The very first time, the phone may ask — tap “Allow” or “Trust” once.",
+  transferring: (done: number, total: number) =>
+    `Copying your photos… ${done.toLocaleString("en-US")} of ${total.toLocaleString("en-US")}`,
+  waiting: "The cable came loose — plug it back in. It will continue by itself.",
+  done: (n: number) =>
+    `All done! ${n.toLocaleString("en-US")} photos and videos are safe on this computer. You can unplug the cable now.`,
+};
 
 export class TrayHost {
-  private receiver: Receiver | null = null;
+  private engine: UsbTransferEngine | null = null;
+  private readonly source: UsbSource;
+  private readonly pollMs: number;
+  private readonly idleRescanMs: number;
+  private timer: NodeJS.Timeout | null = null;
+  private syncing = false;
+  private lastSyncAt = 0;
   private listeners = new Set<(s: TrayState) => void>();
-  private pairNonce: string | null = null;
-
   private state: TrayState;
 
   constructor(private readonly opts: TrayHostOptions) {
+    this.source = opts.source ?? new WpdSource();
+    this.pollMs = opts.devicePollMs ?? 2500;
+    this.idleRescanMs = opts.idleRescanMs ?? 30_000;
     this.state = {
-      phase: "pairing",
+      phase: "plug",
       pairUri: null,
       sasWords: null,
       deviceName: null,
-      headline: "Starting…",
+      headline: COPY.plug,
       doneItems: 0,
       totalItems: 0,
       bytesDone: 0,
@@ -65,10 +76,6 @@ export class TrayHost {
     return this.state;
   }
 
-  get port(): number {
-    return this.receiver?.port ?? 0;
-  }
-
   subscribe(fn: (s: TrayState) => void): () => void {
     this.listeners.add(fn);
     fn(this.state);
@@ -81,145 +88,93 @@ export class TrayHost {
   }
 
   async start(): Promise<void> {
-    this.receiver = await Receiver.start({
-      rootDir: this.opts.libraryDir,
-      port: this.opts.port ?? 47822,
-      deviceName: this.opts.deviceName ?? os.hostname(),
-      // Pairing mode only until at least one device is paired (fail closed).
-      pair: false,
-      verifyFull: true,
-      log: () => {},
-      events: (e) => this.onEvent(e),
+    this.engine = new UsbTransferEngine({
+      libraryDir: this.opts.libraryDir,
+      source: this.source,
+      onProgress: (p) => this.onProgress(p),
     });
-    this.setState({ receiverFingerprint: this.receiver.identity.fingerprint });
-
-    if (this.receiver.pairedDevices.length === 0) {
-      await this.enterPairingMode();
-    } else {
-      this.setState({ phase: "ready", headline: "Ready. Open PhotoRelay on your phone." });
-    }
+    await this.pollOnce();
+    this.timer = setInterval(() => void this.pollOnce(), this.pollMs);
   }
 
-  /** Show the big QR code and admit the next unknown device that connects. */
-  async enterPairingMode(): Promise<void> {
-    if (!this.receiver) throw new Error("receiver not started");
-    this.receiver.setPairMode(true);
-    const { payload, nonce } = pairingPayload({
-      host: lanAddress(),
-      port: this.receiver.port,
-      fingerprint: this.receiver.identity.fingerprint,
-    });
-    this.pairNonce = nonce;
+  private onProgress(p: EngineProgress): void {
     this.setState({
-      phase: "pairing",
-      pairUri: payload,
-      sasWords: null,
-      headline: "Point your phone's camera at this picture",
-    });
-  }
-
-  private onEvent(e: ReceiverEvent): void {
-    switch (e.type) {
-      case "connected": {
-        // Phone connected: show the SAS words for one-tap confirmation.
-        const sas = this.pairNonce
-          ? computeSas(this.state.receiverFingerprint, e.deviceId, this.pairNonce)
-          : null;
-        this.setState({
-          deviceName: e.deviceName,
-          sasWords: sas,
-          headline: "Check the 6 words match your phone",
-        });
-        break;
-      }
-      case "plan": {
-        // Pairing succeeded → pairing mode closes (fail closed again).
-        this.receiver?.setPairMode(false);
-        if (e.send + e.resume === 0) {
-          this.setState({
-            phase: "done",
-            sasWords: null,
-            totalItems: e.totalItems,
-            skipped: e.skip,
-            doneItems: e.skip,
-            bytesTotal: e.totalBytes,
-            bytesDone: 0,
-            headline: `All done. Everything was already backed up.`,
-          });
-        } else {
-          this.setState({
-            phase: "transferring",
-            sasWords: null,
-            totalItems: e.totalItems,
-            skipped: e.skip,
-            doneItems: e.skip,
-            bytesTotal: e.totalBytes,
-            bytesDone: 0,
-            headline: "Copying your photos…",
-          });
-        }
-        break;
-      }
-      case "progress": {
-        if (this.state.phase !== "transferring" && this.state.phase !== "waiting") break;
-        this.refreshProgress();
-        break;
-      }
-      case "file_verified": {
-        this.refreshProgress();
-        break;
-      }
-      case "interrupted": {
-        this.setState({
-          phase: "waiting",
-          headline: "Connection lost — waiting for phone…",
-        });
-        break;
-      }
-      case "complete": {
-        this.setState({
-          phase: "done",
-          headline: `All done! ${e.stored.toLocaleString("en-US")} photos and videos are safe on this computer.`,
-        });
-        this.refreshProgress();
-        break;
-      }
-    }
-  }
-
-  /** Recompute item/byte progress from the journal (single source of truth). */
-  private refreshProgress(): void {
-    if (!this.receiver) return;
-    const row = this.receiver.journal.db
-      .prepare(
-        `SELECT
-           COUNT(*) AS total,
-           SUM(CASE WHEN status = 'stored' THEN 1 ELSE 0 END) AS stored,
-           SUM(CASE WHEN status = 'skipped' THEN 1 ELSE 0 END) AS skipped,
-           SUM(CASE WHEN status != 'skipped' THEN size ELSE 0 END) AS bytes_total,
-           SUM(CASE WHEN status = 'stored' THEN size
-                    WHEN status IN ('transferring','interrupted','verifying') THEN have_bytes
-                    ELSE 0 END) AS bytes_done
-         FROM files`
-      )
-      .get() as { total: number; stored: number; skipped: number; bytes_total: number; bytes_done: number };
-    const totalItems = Number(row.total) || 0;
-    const doneItems = (Number(row.stored) || 0) + (Number(row.skipped) || 0);
-    this.setState({
-      totalItems,
-      doneItems,
-      skipped: Number(row.skipped) || 0,
-      bytesTotal: Number(row.bytes_total) || 0,
-      bytesDone: Number(row.bytes_done) || 0,
+      totalItems: p.total,
+      doneItems: p.done,
+      skipped: p.skipped,
+      bytesTotal: p.bytesTotal,
+      bytesDone: p.bytesDone,
       headline:
-        this.state.phase === "transferring"
-          ? `Copying your photos… ${doneItems.toLocaleString("en-US")} of ${totalItems.toLocaleString("en-US")}`
-          : this.state.headline,
+        this.state.phase === "transferring" ? COPY.transferring(p.done, p.total) : this.state.headline,
     });
+  }
+
+  /** One device poll + maybe a sync. Single-flight via this.syncing. */
+  private async pollOnce(): Promise<void> {
+    if (!this.engine || this.syncing) return;
+
+    let devices: UsbDevice[] = [];
+    try {
+      devices = await this.source.listDevices();
+    } catch {
+      devices = []; // a flaky enumerator looks exactly like "no phone"
+    }
+
+    if (devices.length === 0) {
+      if (this.state.phase !== "transferring" && this.state.phase !== "waiting") {
+        this.setState({ phase: "plug", deviceName: null, headline: COPY.plug });
+      }
+      // If a sync was in flight, its copy error path already set "waiting".
+      return;
+    }
+
+    const device = devices[0];
+    const idleLongEnough = Date.now() - this.lastSyncAt > this.idleRescanMs;
+    const shouldSync =
+      this.state.phase === "plug" ||
+      this.state.phase === "waiting" ||
+      (this.state.phase === "done" && idleLongEnough);
+
+    if (!shouldSync) return;
+
+    this.syncing = true;
+    this.setState({
+      phase: "transferring",
+      deviceName: device.name,
+      headline: "Phone found. Getting your photos ready…",
+    });
+    try {
+      const res = await this.engine.sync(device);
+      this.lastSyncAt = Date.now();
+      const total = this.engine.libraryStats().stored;
+      this.setState({
+        phase: "done",
+        headline: COPY.done(total),
+        doneItems: this.state.doneItems,
+        totalItems: this.state.totalItems,
+      });
+      void res;
+    } catch (err) {
+      if (err instanceof CableRemovedError) {
+        this.setState({ phase: "waiting", headline: COPY.waiting });
+      } else {
+        // Unexpected engine error: surface plainly, stay recoverable.
+        this.setState({ phase: "waiting", headline: COPY.waiting });
+      }
+    } finally {
+      this.syncing = false;
+    }
   }
 
   async stop(): Promise<void> {
-    await this.receiver?.stop();
-    this.receiver = null;
+    if (this.timer) clearInterval(this.timer);
+    this.timer = null;
+    this.engine?.close();
+    this.engine = null;
+  }
+
+  /** Library directory displayed to the user on the Done screen. */
+  get libraryDir(): string {
+    return path.resolve(this.opts.libraryDir);
   }
 }
