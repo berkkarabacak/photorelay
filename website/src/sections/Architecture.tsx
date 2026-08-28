@@ -1,5 +1,5 @@
 import { ArrowLeftRight, ArrowRight, BookOpen, Database, FileCheck, FolderTree, Radio, Smartphone } from "lucide-react";
-import { docUrl } from "@/config";
+import { docUrl, site } from "@/config";
 
 function Box({ title, items, className }: { title: string; items: string[]; className?: string }) {
   return (
@@ -92,6 +92,14 @@ export function Architecture() {
               {d.label} <ArrowRight className="h-3.5 w-3.5" />
             </a>
           ))}
+          <a
+            href={`${site.repoUrl}/tree/main/relay`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-800/60 bg-emerald-950/40 px-3 py-1.5 text-sm font-medium text-emerald-300 transition-colors hover:border-emerald-600"
+          >
+            relay/ — working reference implementation <ArrowRight className="h-3.5 w-3.5" />
+          </a>
         </div>
 
         <div className="mt-8 grid gap-3 text-xs text-muted-foreground sm:grid-cols-3">

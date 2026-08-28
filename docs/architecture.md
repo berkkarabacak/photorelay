@@ -216,9 +216,13 @@ a core could implement them without protocol changes.
 ## 9. Roadmap
 
 1. **Phase 0 — Design** ✅ this repo's `docs/` + website demo
-2. **Phase 1 — Windows receiver + reference CLI sender** (protocol proving
-   ground, golden test vectors)
-3. **Phase 2 — Android app**
-4. **Phase 3 — iOS app**
-5. **Phase 4 — Polish**: background scheduling, selective albums, bandwidth
+2. **Phase 1 — Protocol proving ground** ✅ [`relay/`](../relay/) — reference
+   receiver (journal + transfer engine + verifier) and CLI sender with
+   golden test vectors; e2e + crash-recovery tests prove resume, dedup, and
+   verification
+3. **Phase 1.5 — Windows tray app** (wraps the proven core; adds mDNS
+   discovery, auto-start, notifications)
+4. **Phase 2 — Android app**
+5. **Phase 3 — iOS app**
+6. **Phase 4 — Polish**: background scheduling, selective albums, bandwidth
    limits, NAS destinations

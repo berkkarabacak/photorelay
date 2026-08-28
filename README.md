@@ -22,6 +22,7 @@ reconnect and continue exactly where you left off.
 | [`docs/security-model.md`](docs/security-model.md) | Pairing, encryption, threat model, key storage |
 | [`docs/ux-design.md`](docs/ux-design.md) | UX principles, flows, and copy deck |
 | [`website/`](website/) | Product website + interactive transfer-protocol demo (React + TypeScript + Vite + Tailwind) |
+| [`relay/`](relay/) | **RelaySync/1 reference implementation** — receiver (journal + transfer engine + verifier), CLI sender, golden test vectors, 24 tests |
 
 ## Core design principles
 
@@ -45,7 +46,8 @@ reconnect and continue exactly where you left off.
 - [x] Data model & security model
 - [x] UX design
 - [x] Product website + interactive protocol demo
-- [ ] Windows receiver app
+- [x] RelaySync/1 reference implementation (receiver + CLI sender + golden vectors, [`relay/`](relay/))
+- [ ] Windows tray app (mDNS discovery, auto-start) — protocol core proven in `relay/`
 - [ ] Android app
 - [ ] iOS app
 

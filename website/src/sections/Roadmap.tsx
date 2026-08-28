@@ -13,19 +13,19 @@ const phases = [
     items: ["Product site", "In-browser protocol simulation", "Public documentation"],
   },
   {
+    status: "done" as const,
+    title: "Phase 1 — Protocol reference implementation",
+    items: ["Receiver: journal + transfer engine + verifier", "Reference CLI sender", "Golden vectors · 24 tests green (e2e + crash recovery)"],
+  },
+  {
     status: "next" as const,
-    title: "Phase 1 — Windows receiver",
-    items: ["Tray app + discovery", "Journal & transfer engine", "Reference CLI sender + golden test vectors"],
+    title: "Phase 1.5 — Windows tray app",
+    items: ["Wraps the proven protocol core", "mDNS discovery + QR pairing", "Auto-start + notifications"],
   },
   {
     status: "later" as const,
-    title: "Phase 2 — Android app",
-    items: ["MediaStore scanner", "Foreground transfer service", "QR pairing + auto-backup"],
-  },
-  {
-    status: "later" as const,
-    title: "Phase 3 — iOS app",
-    items: ["PhotoKit scanner", "Bonjour discovery", "BackgroundTasks continuation"],
+    title: "Phase 2 / 3 — Android & iOS apps",
+    items: ["MediaStore / PhotoKit scanners", "Foreground transfer service", "Validated against relay/ golden vectors"],
   },
 ];
 

@@ -1,0 +1,8 @@
+{
+  "note": "xxHash64 seed 0; fingerprint = size:mtime:xxh64(first 1 MiB).",
+  "xxh64_empty": "ef46db3751d8e999",
+  "xxh64_photorelay": "66719ec2834adb44",
+  "sha256_empty": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "sha256_photorelay": "a45428a6f54e2096383d0ce7b31f49ad395772db2086da1f50523456226a4780",
+  "fingerprint_example": "4201187:1723459822:66719ec2834adb44"
+}

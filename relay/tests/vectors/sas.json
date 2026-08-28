@@ -1,0 +1,22 @@
+{
+  "note": "SAS = first 30 bits of SHA-256(sorted(fpA,fpB)|nonce), 6 words x 5 bits.",
+  "fp_a": "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99",
+  "fp_b": "11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00",
+  "nonce": "AQIDBAUGBwgJCgsMDQ4PEA",
+  "words": [
+    "ultra",
+    "quest",
+    "vivid",
+    "vivid",
+    "pearl",
+    "quest"
+  ],
+  "words_reversed_inputs": [
+    "ultra",
+    "quest",
+    "vivid",
+    "vivid",
+    "pearl",
+    "quest"
+  ]
+}
