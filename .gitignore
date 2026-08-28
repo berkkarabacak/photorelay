@@ -9,6 +9,9 @@ build/
 *.log
 npm-debug.log*
 
+# TypeScript build info
+*.tsbuildinfo
+
 # OS
 .DS_Store
 Thumbs.db
