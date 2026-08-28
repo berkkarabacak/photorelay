@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 240 10% 4%;
+  --foreground: 0 0% 96%;
+  --muted: 240 5% 12%;
+  --muted-foreground: 240 5% 62%;
+  --card: 240 7% 8%;
+  --border: 240 5% 16%;
+  --primary: 158 64% 52%;
+  --primary-foreground: 158 80% 8%;
+  --accent: 43 96% 56%;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+::selection {
+  background: hsl(var(--primary) / 0.3);
+}
+
+/* Slim scrollbars for the demo console */
+.slim-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.slim-scroll::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 8px;
+}
+.slim-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Subtle grid backdrop for the hero */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--border) / 0.35) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.35) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 40%, transparent 100%);
+}
