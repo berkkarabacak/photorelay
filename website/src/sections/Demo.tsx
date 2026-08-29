@@ -12,7 +12,6 @@ import {
   Skull,
   Smartphone,
   WifiOff,
-  Zap,
 } from "lucide-react";
 import { cn, formatBytes, formatClock, formatCount, formatDuration } from "@/lib/utils";
 import { useTransferSim } from "@/demo/useTransferSim";
@@ -158,15 +157,16 @@ export function Demo() {
   return (
     <section id="demo" className="relative mx-auto max-w-6xl px-6 py-24">
       <div className="mb-10 max-w-2xl">
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-800/60 bg-emerald-950/40 px-3 py-1 text-xs font-medium text-emerald-300">
-          <Zap className="h-3.5 w-3.5" /> Live engine demo — the same core that runs the Windows app
+        <div className="text-kicker mb-4 flex items-center justify-between">
+          <span>The live engine — running in your browser</span>
+          <span>04 / 07</span>
         </div>
-        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Break it. We dare you.</h2>
+        <h2 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
+          Break it. <em className="text-emerald-300">We dare you.</em>
+        </h2>
         <p className="mt-3 text-muted-foreground">
-          This is a working model of the transfer engine — journal, chunk maps, resume offsets and
-          verification — simulated at ~8× real speed. Whether photos travel over a cable or Wi-Fi,
-          the engine treats interruption as normal. Kill the connection mid-transfer. Restart the
-          receiver. Watch it pick up at the exact chunk where it stopped.
+          A working model of the real engine at ~8× speed. Kill the connection. Crash the receiver.
+          It resumes at the exact chunk.
         </p>
       </div>
 

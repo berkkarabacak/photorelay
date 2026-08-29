@@ -4,12 +4,14 @@ import { site } from "@/config";
 export function Footer() {
   return (
     <footer className="border-t border-border/60">
-      <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-6 py-10 sm:flex-row sm:items-center">
-        <div>
-          <div className="text-sm font-bold">{site.name}</div>
-          <div className="mt-1 text-sm text-muted-foreground">{site.principle}</div>
-        </div>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+      <div className="mx-auto max-w-6xl px-6 pb-10 pt-20 text-center">
+        <p className="font-display text-5xl font-bold leading-tight sm:text-6xl">
+          Plug in.
+          <br />
+          <em className="text-emerald-300">Walk away.</em>
+        </p>
+        <p className="text-kicker mt-8">free &amp; open source · your photos never leave the house</p>
+        <div className="mt-10 flex items-center justify-center gap-6 text-sm text-muted-foreground">
           <span>MIT License</span>
           <a
             href={site.repoUrl}
@@ -17,7 +19,7 @@ export function Footer() {
             rel="noreferrer"
             className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
           >
-            <Github className="h-4 w-4" /> Source
+            <Github className="h-4 w-4" /> {site.repoUrl.replace("https://github.com/", "")}
           </a>
         </div>
       </div>

@@ -4,66 +4,49 @@ import { cn } from "@/lib/utils";
 const phases = [
   {
     status: "done" as const,
-    title: "Phase 0 — Design",
-    items: ["Product architecture", "RelaySync/1 protocol spec", "Data & security models", "UX design & copy deck"],
+    title: "The engine",
+    line: "Protocol, journal, resume — proven by 24+ tests that kill connections mid-flight.",
   },
   {
     status: "done" as const,
-    title: "Website + live demo",
-    items: ["Product site", "In-browser protocol simulation", "Public documentation"],
-  },
-  {
-    status: "done" as const,
-    title: "Phase 1 — Protocol reference implementation",
-    items: ["Receiver: journal + transfer engine + verifier", "Reference CLI sender", "Golden vectors · 24 tests green (e2e + crash recovery)"],
-  },
-  {
-    status: "done" as const,
-    title: "Windows app — USB plug & play",
-    items: ["No phone app — just the charging cable", "Fault-tolerant pull engine (journal, resume, dedup)", "Elderly-first UI · e2e tested incl. cable bumps"],
+    title: "The Windows app",
+    line: "Cable in, photos out. Elderly-first UI, e2e-tested against cable bumps.",
   },
   {
     status: "next" as const,
-    title: "Hardware validation & installer",
-    items: ["Real Android + iPhone cable tests", "One-click installer (electron-builder)", "Auto-start with Windows"],
+    title: "Real phones & installer",
+    line: "Hardware validation on Android + iPhone, one-click install, auto-start.",
   },
   {
     status: "later" as const,
-    title: "Optional companion apps",
-    items: ["Wi-Fi auto-backup without a cable", "Validated against relay/ golden vectors", "Nice-to-have — never required"],
+    title: "Wi-Fi companion apps",
+    line: "Cable-free backups someday. Optional — never required.",
   },
 ];
 
 const meta = {
-  done: { icon: CheckCircle2, label: "Complete", cls: "text-emerald-400 border-emerald-800/60 bg-emerald-950/40" },
-  next: { icon: CircleDot, label: "Up next", cls: "text-amber-300 border-amber-800/60 bg-amber-950/40" },
-  later: { icon: CircleDashed, label: "Planned", cls: "text-zinc-400 border-zinc-700 bg-zinc-900/60" },
+  done: { icon: CheckCircle2, cls: "text-emerald-400 border-emerald-800/60 bg-emerald-950/40", label: "Done" },
+  next: { icon: CircleDot, cls: "text-amber-300 border-amber-800/60 bg-amber-950/40", label: "Next" },
+  later: { icon: CircleDashed, cls: "text-zinc-400 border-zinc-700 bg-zinc-900/60", label: "Later" },
 };
 
 export function Roadmap() {
   return (
     <section id="roadmap" className="mx-auto max-w-6xl px-6 py-24">
-      <div className="mb-12 max-w-2xl">
-        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Roadmap</h2>
-        <p className="mt-3 text-muted-foreground">
-          Design first, protocol second, apps third. Each phase ships against the same
-          specification — no per-platform improvisation.
-        </p>
+      <div className="text-kicker mb-8 flex items-center justify-between">
+        <span>Where it's going</span>
+        <span>06 / 07</span>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {phases.map((p) => {
           const m = meta[p.status];
           return (
-            <div key={p.title} className="rounded-2xl border border-border bg-card/60 p-5">
-              <span className={cn("mb-3 inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium", m.cls)}>
+            <div key={p.title} className="rounded-2xl border border-border bg-card/60 p-6">
+              <span className={cn("mb-4 inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium", m.cls)}>
                 <m.icon className="h-3.5 w-3.5" /> {m.label}
               </span>
-              <h3 className="mb-2 text-sm font-semibold">{p.title}</h3>
-              <ul className="space-y-1.5 text-xs leading-relaxed text-muted-foreground">
-                {p.items.map((i) => (
-                  <li key={i}>· {i}</li>
-                ))}
-              </ul>
+              <h3 className="font-display mb-1.5 text-xl font-bold">{p.title}</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">{p.line}</p>
             </div>
           );
         })}

@@ -27,11 +27,15 @@ export function Architecture() {
     <section id="architecture" className="border-y border-border/60 bg-zinc-950/50">
       <div className="mx-auto max-w-6xl px-6 py-24">
         <div className="mb-12 max-w-2xl">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">One protocol, three apps</h2>
+          <div className="text-kicker mb-4 flex items-center justify-between">
+            <span>Under the hood</span>
+            <span>05 / 07</span>
+          </div>
+          <h2 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
+            One engine. <em className="text-emerald-300">Every path in.</em>
+          </h2>
           <p className="mt-3 text-muted-foreground">
-            The protocol is the product. The Windows receiver, the Android app, and the iOS app are
-            interchangeable implementations of the same state machine, journal, and wire format —
-            so behavior is identical no matter which device you hold.
+            Cable today, Wi-Fi when you want it — the same journal, the same promises.
           </p>
         </div>
 

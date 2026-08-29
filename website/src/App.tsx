@@ -1,9 +1,8 @@
 import { Nav } from "@/sections/Nav";
 import { Hero } from "@/sections/Hero";
+import { StatStrip } from "@/sections/StatStrip";
 import { Problem } from "@/sections/Problem";
-import { Principle } from "@/sections/Principle";
 import { HowItWorks } from "@/sections/HowItWorks";
-import { ForFamilies } from "@/sections/ForFamilies";
 import { Demo } from "@/sections/Demo";
 import { Architecture } from "@/sections/Architecture";
 import { Roadmap } from "@/sections/Roadmap";
@@ -15,10 +14,9 @@ export default function App() {
       <Nav />
       <main>
         <Hero />
+        <StatStrip />
         <Problem />
-        <Principle />
         <HowItWorks />
-        <ForFamilies />
         <Demo />
         <Architecture />
         <Roadmap />

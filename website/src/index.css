@@ -25,6 +25,20 @@ body {
     "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Editorial display type — the reference style: serif display with italic accents */
+.font-display {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  letter-spacing: -0.02em;
+}
+
+.text-kicker {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
 ::selection {
   background: hsl(var(--primary) / 0.3);
 }
