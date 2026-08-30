@@ -47,7 +47,15 @@ function Enumerate-Folder($folder, $prefix) {
         relPath = $rel
         name = $item.Name
         size = [int64]($item.ExtendedProperty('System.Size'))
-        mtime = [int64]([DateTimeOffset]($item.ModifyDate)).ToUnixTimeSeconds()
+        # WPD items report ModifyDate as 1899 (unset COM date). Try the real
+        # date properties; 0 = unknown, the engine substitutes a sane value.
+        mtime = [int64](& {
+          foreach ($prop in 'System.Photo.DateTaken','System.DateModified','System.ItemDate','System.DateCreated') {
+            $d = $item.ExtendedProperty($prop)
+            if ($d -and $d.Year -gt 1990) { return ([DateTimeOffset]$d).ToUnixTimeSeconds() }
+          }
+          return 0
+        })
       }
     }
   }
@@ -126,14 +134,17 @@ foreach ($part in '${psq(file.relPath)}' -split '/') {
 if (-not $item -or $item.IsFolder) { throw 'file not found on device' }
 $dest = $shell.NameSpace('${psq(destDir)}')
 $dest.CopyHere($item, 4 -bor 16 -bor 1024)
-# CopyHere is asynchronous — wait until the file appears with content.
+# CopyHere is asynchronous and always uses the source file's name — wait for
+# the file to appear under its original name, then rename to the target.
+$copied = '${psq(destDir)}\\' + '${psq(file.name)}'
 $target = '${psq(destPath)}'
 $deadline = (Get-Date).AddMinutes(10)
 while ((Get-Date) -lt $deadline) {
-  if ((Test-Path $target) -and (Get-Item $target).Length -gt 0) { break }
+  if ((Test-Path -LiteralPath $copied) -and (Get-Item -LiteralPath $copied).Length -ge ${file.size}) { break }
   Start-Sleep -Milliseconds 200
 }
-if (-not (Test-Path $target)) { throw 'copy did not complete' }
+if (-not (Test-Path -LiteralPath $copied)) { throw 'copy did not complete' }
+if ($copied -ne $target) { Move-Item -LiteralPath $copied -Destination $target -Force }
 [PSCustomObject]@{ ok = $true } | ConvertTo-Json -Compress
 `;
     await ps(script);

@@ -110,9 +110,10 @@ export class UsbTransferEngine {
     }
   }
 
-  /** Fingerprint: cheap metadata identity (Level 1). */
+  /** Fingerprint: cheap metadata identity (Level 1). Name+size only —
+   *  MTP-reported dates vary between sessions and must not trigger re-copies. */
   private fingerprint(f: UsbFile): string {
-    return `${f.name}:${f.size}:${Math.floor(f.mtime)}`;
+    return `${f.name}:${f.size}`;
   }
 
   private isStored(fileKey: string, fp: string): boolean {
@@ -207,13 +208,16 @@ export class UsbTransferEngine {
         .run(key, device.id, f.name, f.relPath, f.size, f.mtime, fp, sha, Date.now());
 
       // Atomic promote into <Library>/<Device>/<yyyy>/<yyyy-MM>/<name>
-      const sub = storeSubdirs(f.mtime);
+      // WPD dates can be unknown (0) — fall back to "now" so the folder
+      // layout stays sane.
+      const when = f.mtime > 0 ? f.mtime : Math.floor(Date.now() / 1000);
+      const sub = storeSubdirs(when);
       const dir = path.join(this.libraryDir, device.name, sub);
       fs.mkdirSync(dir, { recursive: true });
       const finalName = uniqueName((c) => fs.existsSync(path.join(dir, c)), sanitizeRelPath(f.name));
       const finalPath = path.join(dir, finalName);
       fs.renameSync(stagePath, finalPath);
-      const t = new Date(f.mtime * 1000);
+      const t = new Date(when * 1000);
       fs.utimesSync(finalPath, t, t);
       const storedAs = path.relative(this.libraryDir, finalPath).split(path.sep).join("/");
 
