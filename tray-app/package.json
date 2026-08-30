@@ -15,7 +15,33 @@
     "start": "electron .",
     "smoke": "electron . --smoke",
     "icons": "node scripts/make-icons.mjs",
-    "test": "tsx --test tests/*.test.ts"
+    "test": "tsx --test tests/*.test.ts",
+    "pack:win": "npm run build && electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.photorelay.app",
+    "productName": "PhotoRelay",
+    "directories": {
+      "output": "release",
+      "buildResources": "assets"
+    },
+    "files": [
+      "dist/**/*",
+      "preload.cjs",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon-256.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "PhotoRelay",
+      "runAfterFinish": true
+    }
   },
   "dependencies": {
     "qrcode": "^1.5.4"
@@ -28,6 +54,7 @@
     "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "^10.4.20",
     "electron": "^39.0.0",
+    "electron-builder": "^25.1.8",
     "esbuild": "^0.25.0",
     "postcss": "^8.4.49",
     "react": "^18.3.1",

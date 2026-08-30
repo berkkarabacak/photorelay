@@ -19,8 +19,13 @@ const execFileAsync = promisify(execFile);
 
 async function ps<T>(script: string, maxBufferMB = 256): Promise<T> {
   const encoded = Buffer.from(script, "utf16le").toString("base64");
+  // Resolve PowerShell explicitly: apps launched outside a normal shell
+  // (tray, installer, Electron) may not have System32 on PATH.
+  const psExe = process.env.SystemRoot
+    ? `${process.env.SystemRoot}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`
+    : "powershell.exe";
   const { stdout } = await execFileAsync(
-    "powershell.exe",
+    psExe,
     ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", encoded],
     { maxBuffer: maxBufferMB * 1024 * 1024, windowsHide: true }
   );
@@ -57,8 +62,9 @@ $ErrorActionPreference = 'Stop'
 $shell = New-Object -ComObject Shell.Application
 $devices = @()
 foreach ($item in $shell.NameSpace(17).Items()) {
-  # Portable devices under "This PC" are folders with no filesystem path.
-  if ($item.IsFolder -and -not $item.Path) {
+  # Portable devices under "This PC" are folders whose path is not a drive root (like C:\).
+  $p = [string]$item.Path
+  if ($item.IsFolder -and $p -notlike '?:\\*') {
     $devices += [PSCustomObject]@{ id = $item.Name; name = $item.Name }
   }
 }
@@ -78,7 +84,14 @@ if (-not $device) { throw 'device disconnected' }
 $all = @()
 foreach ($top in $device.GetFolder.Items()) {
   # Phones expose storage volumes ("Internal shared storage", "SD card").
-  if ($top.IsFolder) { $all += Enumerate-Folder $top.GetFolder $top.Name }
+  if (-not $top.IsFolder) { continue }
+  # Descend only into media folders at the storage root — walking the whole
+  # phone over MTP is minutes-slow.
+  foreach ($sub in $top.GetFolder.Items()) {
+    if ($sub.IsFolder -and $sub.Name -match '^(DCIM|Pictures|Movies)$') {
+      $all += Enumerate-Folder $sub.GetFolder ($top.Name + '/' + $sub.Name)
+    }
+  }
 }
 ConvertTo-Json -Compress -InputObject @($all)
 `;
@@ -86,8 +99,11 @@ ConvertTo-Json -Compress -InputObject @($all)
     const list = (Array.isArray(raw) ? raw : raw ? [raw] : []).filter(
       (f) => f && mediaKind(f.name) && f.size > 0
     );
-    // Keep media folders only: DCIM / Pictures / Movies anywhere in the path.
-    return list.filter((f) => /(^|\/)(DCIM|Pictures|Movies)(\/|$)/i.test(f.relPath));
+    // Keep media folders only: DCIM / Pictures / Movies, skip hidden cache
+    // folders like .thumbnails anywhere in the path.
+    return list.filter(
+      (f) => /(^|\/)(DCIM|Pictures|Movies)(\/|$)/i.test(f.relPath) && !/(^|\/)\.[^/]+(\/|$)/.test(f.relPath)
+    );
   }
 
   async copyTo(deviceId: string, file: UsbFile, destPath: string): Promise<void> {
