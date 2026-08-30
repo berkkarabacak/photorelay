@@ -1,5 +1,5 @@
 {
-  "name": "@photorelay/tray-app",
+  "name": "photorelay",
   "version": "0.1.0",
   "private": true,
   "type": "module",
