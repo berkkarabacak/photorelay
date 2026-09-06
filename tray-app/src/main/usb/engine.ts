@@ -15,8 +15,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { sha256Hex } from "../../../../relay/src/protocol/hash.js";
-import { sanitizeRelPath, storeSubdirs, uniqueName } from "../../../../relay/src/protocol/paths.js";
+import { sanitizeRelPath, uniqueName } from "../../../../relay/src/protocol/paths.js";
 import type { UsbDevice, UsbFile, UsbSource } from "./source.js";
+import { defaultCategorize, type CategorizeInput } from "./categorize.js";
 
 export interface EngineProgress {
   total: number;
@@ -33,6 +34,9 @@ export interface UsbEngineOptions {
   source: UsbSource;
   /** Full-file SHA-256 of the staged copy (recorded for dedup/audit) */
   hashStaged?: boolean; // default true — local read, cheap
+  /** Where a file lands under <Library>/<Device>/ — default: Screenshots/,
+   *  Places/<City>/ for GPS photos, date folders otherwise. Injectable for tests. */
+  categorize?: (i: CategorizeInput) => Promise<string>;
   onProgress?: (p: EngineProgress) => void;
   onFileStored?: (name: string, storedAs: string) => void;
 }
@@ -62,6 +66,7 @@ export class UsbTransferEngine {
   readonly libraryDir: string;
   private readonly incomingDir: string;
   private readonly hashStaged: boolean;
+  private readonly categorize: (i: CategorizeInput) => Promise<string>;
   private readonly onProgress: (p: EngineProgress) => void;
   private readonly onFileStored: (name: string, storedAs: string) => void;
   private progress: EngineProgress = {
@@ -79,6 +84,7 @@ export class UsbTransferEngine {
     this.incomingDir = path.join(this.libraryDir, ".photorelay", "incoming");
     fs.mkdirSync(this.incomingDir, { recursive: true });
     this.hashStaged = opts.hashStaged ?? true;
+    this.categorize = opts.categorize ?? defaultCategorize;
     this.onProgress = opts.onProgress ?? (() => {});
     this.onFileStored = opts.onFileStored ?? (() => {});
     this.db = new DatabaseSync(path.join(this.libraryDir, ".photorelay", "usb-journal.db"));
@@ -207,11 +213,11 @@ export class UsbTransferEngine {
         )
         .run(key, device.id, f.name, f.relPath, f.size, f.mtime, fp, sha, Date.now());
 
-      // Atomic promote into <Library>/<Device>/<yyyy>/<yyyy-MM>/<name>
+      // Atomic promote into <Library>/<Device>/<category>/<name>
       // WPD dates can be unknown (0) — fall back to "now" so the folder
-      // layout stays sane.
+      // layout stays sane. Category: Screenshots / Places/<City> / by date.
       const when = f.mtime > 0 ? f.mtime : Math.floor(Date.now() / 1000);
-      const sub = storeSubdirs(when);
+      const sub = await this.categorize({ name: f.name, relPath: f.relPath, when, stagePath });
       const dir = path.join(this.libraryDir, device.name, sub);
       fs.mkdirSync(dir, { recursive: true });
       const finalName = uniqueName((c) => fs.existsSync(path.join(dir, c)), sanitizeRelPath(f.name));

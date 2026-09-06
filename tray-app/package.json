@@ -1,6 +1,6 @@
 {
   "name": "photorelay",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "PhotoRelay Windows tray app — big QR pairing, zero-tap transfers, zero command line.",
@@ -44,6 +44,7 @@
     }
   },
   "dependencies": {
+    "exifreader": "^4.44.1",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
