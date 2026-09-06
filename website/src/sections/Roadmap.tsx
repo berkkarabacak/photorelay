@@ -23,6 +23,11 @@ const phases = [
     line: "No admin, no questions — download, double-click, plug the cable. On GitHub Releases.",
   },
   {
+    status: "done" as const,
+    title: "Smart organization",
+    line: "v0.2.0: screenshots stay separate; GPS photos file themselves under Places — offline city map, nothing leaves the PC.",
+  },
+  {
     status: "next" as const,
     title: "iPhone & auto-start",
     line: "Validate the 'Trust this computer' flow on iPhone; start with Windows.",
