@@ -52,7 +52,6 @@ are all anyone needs.
 - [x] Product website + interactive protocol demo
 - [x] RelaySync/1 reference implementation (receiver + CLI sender + golden vectors, [`relay/`](relay/))
 - [x] Windows tray app ([`tray-app/`](tray-app/)) — **USB plug-and-play: no phone app needed**, fault-tolerant pull engine, elderly-first UI
-- [x] Windows tray app ([`tray-app/`](tray-app/)) — **USB plug-and-play: no phone app needed**, fault-tolerant pull engine, elderly-first UI
 - [x] Real-phone USB validation — Redmi K60 Ultra: 362 photos & videos, 2.21 GB, byte-exact; re-plug copies nothing twice
 - [x] One-click installer — v0.1.0 on [Releases](https://github.com/berkkarabacak/photorelay/releases); no admin, no questions
 - [ ] iPhone validation ("Trust this computer" flow) + Windows auto-start
@@ -60,7 +59,7 @@ are all anyone needs.
 
 ## Download
 
-**[PhotoRelay Setup 0.1.0 (Windows, one-click)](https://github.com/berkkarabacak/photorelay/releases/download/v0.1.0/PhotoRelay-Setup-0.1.0.exe)** — install, plug the phone in, done. Unlock the phone and tap "File Transfer / Allow" if it asks.
+**[Download PhotoRelay for Windows](https://github.com/berkkarabacak/photorelay/releases/latest)** — install, plug the phone in, done. Unlock the phone and tap "File Transfer / Allow" if it asks.
 
 ## Developing the website
 
