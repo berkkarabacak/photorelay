@@ -13,9 +13,19 @@ const phases = [
     line: "Cable in, photos out. Elderly-first UI, e2e-tested against cable bumps.",
   },
   {
+    status: "done" as const,
+    title: "Real phone, real photos",
+    line: "Redmi K60 Ultra over USB: 362 photos & videos, 2.2 GB, byte-exact. Re-plug copies nothing twice.",
+  },
+  {
+    status: "done" as const,
+    title: "One-click installer",
+    line: "No admin, no questions — download, double-click, plug the cable. On GitHub Releases.",
+  },
+  {
     status: "next" as const,
-    title: "Real phones & installer",
-    line: "Hardware validation on Android + iPhone, one-click install, auto-start.",
+    title: "iPhone & auto-start",
+    line: "Validate the 'Trust this computer' flow on iPhone; start with Windows.",
   },
   {
     status: "later" as const,

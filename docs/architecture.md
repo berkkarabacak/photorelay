@@ -1,6 +1,6 @@
 # PhotoRelay — Product Architecture
 
-Version 0.1 · Status: initial design
+Version 0.1 · Status: **validated on real hardware** — full 362-file (2.21 GB) USB transfer from a Redmi K60 Ultra, byte-exact, with resume and re-plug dedup verified live
 
 ---
 

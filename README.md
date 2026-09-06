@@ -39,8 +39,9 @@ are all anyone needs.
    A partially transferred file can never be mistaken for a complete one.
 4. **Never duplicate.** Content-aware incremental sync detects
    already-transferred files, so restarting a backup is always safe.
-5. **No MTP.** Wireless transfer over the local network (TLS over TCP),
-   paired via QR code. No drivers, no Explorer, no DCIM spelunking.
+5. **No MTP spelunking, no drivers, no Explorer.** The app talks to the
+   phone over the USB cable through Windows Portable Devices, journaling
+   every file. (Wi-Fi via TLS + QR pairing remains an optional future mode.)
 
 ## Status
 
@@ -51,8 +52,15 @@ are all anyone needs.
 - [x] Product website + interactive protocol demo
 - [x] RelaySync/1 reference implementation (receiver + CLI sender + golden vectors, [`relay/`](relay/))
 - [x] Windows tray app ([`tray-app/`](tray-app/)) — **USB plug-and-play: no phone app needed**, fault-tolerant pull engine, elderly-first UI
-- [ ] Real-phone USB validation + one-click installer packaging
+- [x] Windows tray app ([`tray-app/`](tray-app/)) — **USB plug-and-play: no phone app needed**, fault-tolerant pull engine, elderly-first UI
+- [x] Real-phone USB validation — Redmi K60 Ultra: 362 photos & videos, 2.21 GB, byte-exact; re-plug copies nothing twice
+- [x] One-click installer — v0.1.0 on [Releases](https://github.com/berkkarabacak/photorelay/releases); no admin, no questions
+- [ ] iPhone validation ("Trust this computer" flow) + Windows auto-start
 - [ ] Optional companion apps (Wi-Fi auto-backup) — not required for the core product
+
+## Download
+
+**[PhotoRelay Setup 0.1.0 (Windows, one-click)](https://github.com/berkkarabacak/photorelay/releases/download/v0.1.0/PhotoRelay-Setup-0.1.0.exe)** — install, plug the phone in, done. Unlock the phone and tap "File Transfer / Allow" if it asks.
 
 ## Developing the website
 

@@ -7,6 +7,8 @@ export const site = {
   tagline: "Reliable phone → PC photo transfer",
   principle: "Transfers can fail. PhotoRelay makes failure irrelevant.",
   repoUrl: "https://github.com/berkkarabacak/photorelay",
+  downloadUrl: "https://github.com/berkkarabacak/photorelay/releases/download/v0.1.0/PhotoRelay-Setup-0.1.0.exe",
+  version: "0.1.0",
   protocol: "RelaySync/1",
 } as const;
 

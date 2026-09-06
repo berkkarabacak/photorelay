@@ -1,4 +1,4 @@
-import { ArrowDown, Github } from "lucide-react";
+import { ArrowDown, Download, Github } from "lucide-react";
 import { site } from "@/config";
 import { CableVisual } from "@/sections/CableVisual";
 
@@ -24,8 +24,14 @@ export function Hero() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a
-              href="#demo"
+              href={site.downloadUrl}
               className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-emerald-300"
+            >
+              <Download className="h-4 w-4" /> Download for Windows · v{site.version}
+            </a>
+            <a
+              href="#demo"
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-zinc-900/70 px-5 py-2.5 text-sm font-semibold text-zinc-200 transition-colors hover:border-zinc-600"
             >
               Watch it survive a bad cable <ArrowDown className="h-4 w-4" />
             </a>
@@ -38,7 +44,7 @@ export function Hero() {
               <Github className="h-4 w-4" /> Source
             </a>
           </div>
-          <div className="text-kicker mt-10">free &amp; open source · no account · no cloud</div>
+          <div className="text-kicker mt-10">free &amp; open source · no account · no cloud · tested on a real phone</div>
         </div>
         <div className="flex justify-center lg:justify-end">
           <CableVisual />
